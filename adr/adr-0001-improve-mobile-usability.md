@@ -1,4 +1,4 @@
-**Improve Mobile Usability by Implementing Responsive Design**
+**ADR-0001: Improve Mobile Usability by Implementing Responsive Design**
 
   Right now application looks well on desktop but lacks responsive design for mobile. The poor usability on smaller devices negatively impacts user experience (users can't easily browse, play, or explore music on mobile), accessibility and reach (many users access music platforms from mobile devices), user retention (frustration leads to drop-offs) and market competitiveness(industry standard expects responsive design).
 
