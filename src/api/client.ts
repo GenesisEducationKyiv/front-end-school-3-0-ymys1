@@ -24,19 +24,23 @@ import {
   
   async function handleResponse<T>(response: Response, schema: z.ZodType<T>): Promise<Result<T, Error>> {
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      return err(new Error(errorData.error || 'An error occurred'));
+      try {
+        const errorData = await response.json();
+        return err(new Error(errorData.error || `Error: ${response.status} ${response.statusText}`));
+      } catch (e) {
+        return err(new Error(`Error: ${response.status} ${response.statusText}`));
+      }
     }
-  
+
     if (response.status === 204) {
       return ok({} as T);
     }
-  
+
     try {
       const data = await response.json();
       const parsed = schema.safeParse(data);
       if (!parsed.success) {
-        return err(new Error('Invalid response format'));
+        return err(new Error(`Invalid response format: ${parsed.error.message}`));
       }
       return ok(parsed.data);
     } catch (e) {
