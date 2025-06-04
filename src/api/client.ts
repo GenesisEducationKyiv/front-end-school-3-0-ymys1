@@ -11,6 +11,7 @@ import {
     trackQuerySchema
   } from '../shared/schemas/common.schema';
   import { z } from 'zod';
+  import { Result, ok, err } from 'neverthrow';
   
   const API_URL = 'http://localhost:8000';
   const API_ENDPOINTS = {
@@ -19,17 +20,26 @@ import {
     files: `${API_URL}/api/files`,
   } as const;
   
-  async function handleResponse<T>(response: Response): Promise<T> {
+  async function handleResponse<T>(response: Response, schema: z.ZodType<T>): Promise<Result<T, Error>> {
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'An error occurred');
+      const errorData = await response.json().catch(() => ({}));
+      return err(new Error(errorData.error || 'An error occurred'));
     }
   
     if (response.status === 204) {
-      return {} as T;
+      return ok({} as T);
     }
   
-    return response.json() as Promise<T>;
+    try {
+      const data = await response.json();
+      const parsed = schema.safeParse(data);
+      if (!parsed.success) {
+        return err(new Error('Invalid response format'));
+      }
+      return ok(parsed.data);
+    } catch (e) {
+      return err(new Error('Failed to parse response'));
+    }
   }
   
   function buildQueryString(params: Record<string, unknown>): string {
@@ -51,100 +61,88 @@ import {
   
   // Tracks API
   export const tracksApi = {
-    getTracks: async (params: Partial<TrackQueryParams> = {}): Promise<PaginatedResponse<Track>> => {
-      // Validate query params
-      const validParams = trackQuerySchema.partial().parse(params);
-      
+    getTracks: async (params: Partial<TrackQueryParams> = {}): Promise<Result<PaginatedResponse<Track>, Error>> => {
+      const validParams = trackQuerySchema.partial().safeParse(params);
+      if (!validParams.success) {
+        return err(new Error('Invalid query parameters'));
+      }
       const queryString = buildQueryString({
-        page: validParams.page || 1,
-        limit: validParams.pageSize || 20,
-        sort: validParams.sortBy,
-        order: validParams.sortOrder,
-        search: validParams.search,
-        genre: validParams.genre,
-        artist: validParams.artist
+        page: validParams.data.page || 1,
+        limit: validParams.data.pageSize || 20,
+        sort: validParams.data.sortBy,
+        order: validParams.data.sortOrder,
+        search: validParams.data.search,
+        genre: validParams.data.genre,
+        artist: validParams.data.artist
       });
-  
       const response = await fetch(`${API_ENDPOINTS.tracks}${queryString}`);
-      const data = await handleResponse<PaginatedResponse<Track>>(response);
-      
-      // Validate response data
-      const validatedResponse = paginatedResponseSchema.parse(data);
-      return {
-        ...validatedResponse,
-        data: data.data.map(track => trackSchema.parse(track))
-      };
+      return handleResponse(response, paginatedResponseSchema(trackSchema));
     },
   
-    getTrack: async (slug: string): Promise<Track> => {
+    getTrack: async (slug: string): Promise<Result<Track, Error>> => {
       const response = await fetch(`${API_ENDPOINTS.tracks}/${slug}`);
-      const data = await handleResponse<Track>(response);
-      return trackSchema.parse(data);
+      return handleResponse(response, trackSchema);
     },
   
-    createTrack: async (data: unknown): Promise<Track> => {
-      // Validate input data
-      const validData = createTrackSchema.parse(data);
-      
+    createTrack: async (data: unknown): Promise<Result<Track, Error>> => {
+      const validData = createTrackSchema.safeParse(data);
+      if (!validData.success) {
+        return err(new Error('Invalid track data'));
+      }
       const response = await fetch(API_ENDPOINTS.tracks, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(validData)
+        body: JSON.stringify(validData.data)
       });
-      const responseData = await handleResponse<Track>(response);
-      return trackSchema.parse(responseData);
+      return handleResponse(response, trackSchema);
     },
   
-    updateTrack: async (id: string, data: unknown): Promise<Track> => {
-      // Validate input data
-      const validData = updateTrackSchema.parse(data);
-      
+    updateTrack: async (id: string, data: unknown): Promise<Result<Track, Error>> => {
+      const validData = updateTrackSchema.safeParse(data);
+      if (!validData.success) {
+        return err(new Error('Invalid track data'));
+      }
       const response = await fetch(`${API_ENDPOINTS.tracks}/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(validData)
+        body: JSON.stringify(validData.data)
       });
-      const responseData = await handleResponse<Track>(response);
-      return trackSchema.parse(responseData);
+      return handleResponse(response, trackSchema);
     },
   
-    deleteTrack: async (id: string): Promise<void> => {
+    deleteTrack: async (id: string): Promise<Result<void, Error>> => {
       const response = await fetch(`${API_ENDPOINTS.tracks}/${id}`, {
         method: 'DELETE'
       });
-      return handleResponse<void>(response);
+      return handleResponse(response, z.void());
     },
   
-    uploadAudio: async (id: string, file: File): Promise<Track> => {
+    uploadAudio: async (id: string, file: File): Promise<Result<Track, Error>> => {
       const formData = new FormData();
       formData.append('file', file);
-  
       const response = await fetch(`${API_ENDPOINTS.tracks}/${id}/upload`, {
         method: 'POST',
         body: formData
       });
-      const data = await handleResponse<Track>(response);
-      return trackSchema.parse(data);
+      return handleResponse(response, trackSchema);
     },
   
-    deleteAudio: async (id: string): Promise<Track> => {
+    deleteAudio: async (id: string): Promise<Result<Track, Error>> => {
       const response = await fetch(`${API_ENDPOINTS.tracks}/${id}/file`, {
         method: 'DELETE'
       });
-      const data = await handleResponse<Track>(response);
-      return trackSchema.parse(data);
+      return handleResponse(response, trackSchema);
     }
   };
   
   // Genres API
   export const genresApi = {
-    getGenres: async (): Promise<string[]> => {
+    getGenres: async (): Promise<Result<string[], Error>> => {
       const response = await fetch(API_ENDPOINTS.genres);
-      const data = await handleResponse<string[]>(response);
-      return z.array(z.string()).parse(data);
+      return handleResponse(response, z.array(z.string()));
     }
   };
