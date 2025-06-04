@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectLoading, selectError, selectTracks } from './tracksListSlice';
 import { setTracks, updateTrack, deleteTrack, addTrack } from './tracksListSlice';
 import { tracksApi } from '../../api/client';
-import { Track, CreateTrackDto } from '../../shared/types';
+import { Track, CreateTrackDto } from '../../shared/schemas/track.schema';
 import { useFilterParams } from '../../shared/hooks/useFilterParams';
 import { TrackItem } from './components/TrackItem';
 import { EditTrackDialog } from './components/EditTrackDialog';

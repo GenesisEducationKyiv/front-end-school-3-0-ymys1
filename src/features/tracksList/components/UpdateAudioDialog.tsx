@@ -8,7 +8,7 @@ import {
 } from '../../../components/ui/dialog';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
-import { Track } from '../../../shared/types';
+import { Track } from '../../../shared/schemas/track.schema';
 
 interface UpdateAudioDialogProps {
   track: Track | null;

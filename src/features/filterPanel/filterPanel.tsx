@@ -2,14 +2,17 @@ import { Search } from "lucide-react";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { useSelector } from "react-redux";
-import { selectFilterOptions } from "../tracksList/tracksListSlice";
 import { SORT_OPTIONS } from "./constants/constants";
 import { useFilterParams } from "../../shared/hooks/useFilterParams";
 
-export const FilterPanel = () => {
+export const FilterPanel = ({
+    artists = [],
+    genres = []
+}: {
+    artists?: string[];
+    genres?: string[];
+}) => {
     const { filters, updateFilters } = useFilterParams();
-    const { artists = [], genres = [] } = useSelector(selectFilterOptions) || { artists: [], genres: [] };
 
     return (
         <div className="p-4 rounded-lg border border-[#E5E7EB] mb-4">

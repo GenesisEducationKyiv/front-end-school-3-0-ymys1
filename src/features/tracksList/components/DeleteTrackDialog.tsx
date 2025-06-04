@@ -6,7 +6,7 @@ import {
   DialogFooter,
 } from '../../../components/ui/dialog';
 import { Button } from '../../../components/ui/button';
-import { Track } from '../../../shared/types';
+import { Track } from '../../../shared/schemas/track.schema';
 
 interface DeleteTrackDialogProps {
   track: Track | null;

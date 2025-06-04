@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Track } from '../../../shared/types';
+import { Track } from '../../../shared/schemas/track.schema';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import {

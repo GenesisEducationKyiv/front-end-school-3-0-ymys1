@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { Track } from "../../../shared/types"
+import { Track } from "../../../shared/schemas/track.schema"
 import { Badge } from "../../../components/ui/badge"
 import { Edit, MoreVertical, Upload, Trash2, Music } from "lucide-react"
 import { cn } from "../../../shared/utils/utils"

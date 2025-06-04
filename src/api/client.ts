@@ -1,11 +1,16 @@
 import {
     Track,
-    CreateTrackDto,
-    UpdateTrackDto,
+    trackSchema,
+    createTrackSchema,
+    updateTrackSchema
+  } from '../shared/schemas/track.schema';
+  import {
     PaginatedResponse,
     TrackQueryParams,
-    DeleteBulkResponse
-  } from '../shared/types';
+    paginatedResponseSchema,
+    trackQuerySchema
+  } from '../shared/schemas/common.schema';
+  import { z } from 'zod';
   
   const API_URL = 'http://localhost:8000';
   const API_ENDPOINTS = {
@@ -47,45 +52,64 @@ import {
   // Tracks API
   export const tracksApi = {
     getTracks: async (params: Partial<TrackQueryParams> = {}): Promise<PaginatedResponse<Track>> => {
+      // Validate query params
+      const validParams = trackQuerySchema.partial().parse(params);
+      
       const queryString = buildQueryString({
-        page: params.page || 1,
-        limit: params.pageSize || 20,
-        sort: params.sortBy,
-        order: params.sortOrder,
-        search: params.search,
-        genre: params.genre,
-        artist: params.artist
+        page: validParams.page || 1,
+        limit: validParams.pageSize || 20,
+        sort: validParams.sortBy,
+        order: validParams.sortOrder,
+        search: validParams.search,
+        genre: validParams.genre,
+        artist: validParams.artist
       });
   
       const response = await fetch(`${API_ENDPOINTS.tracks}${queryString}`);
-      return handleResponse<PaginatedResponse<Track>>(response);
+      const data = await handleResponse<PaginatedResponse<Track>>(response);
+      
+      // Validate response data
+      const validatedResponse = paginatedResponseSchema.parse(data);
+      return {
+        ...validatedResponse,
+        data: data.data.map(track => trackSchema.parse(track))
+      };
     },
   
     getTrack: async (slug: string): Promise<Track> => {
       const response = await fetch(`${API_ENDPOINTS.tracks}/${slug}`);
-      return handleResponse<Track>(response);
+      const data = await handleResponse<Track>(response);
+      return trackSchema.parse(data);
     },
   
-    createTrack: async (data: CreateTrackDto): Promise<Track> => {
+    createTrack: async (data: unknown): Promise<Track> => {
+      // Validate input data
+      const validData = createTrackSchema.parse(data);
+      
       const response = await fetch(API_ENDPOINTS.tracks, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(validData)
       });
-      return handleResponse<Track>(response);
+      const responseData = await handleResponse<Track>(response);
+      return trackSchema.parse(responseData);
     },
   
-    updateTrack: async (id: string, data: UpdateTrackDto): Promise<Track> => {
+    updateTrack: async (id: string, data: unknown): Promise<Track> => {
+      // Validate input data
+      const validData = updateTrackSchema.parse(data);
+      
       const response = await fetch(`${API_ENDPOINTS.tracks}/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(validData)
       });
-      return handleResponse<Track>(response);
+      const responseData = await handleResponse<Track>(response);
+      return trackSchema.parse(responseData);
     },
   
     deleteTrack: async (id: string): Promise<void> => {
@@ -93,17 +117,6 @@ import {
         method: 'DELETE'
       });
       return handleResponse<void>(response);
-    },
-  
-    deleteBulk: async (ids: string[]): Promise<DeleteBulkResponse> => {
-      const response = await fetch(`${API_ENDPOINTS.tracks}/delete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ ids })
-      });
-      return handleResponse<DeleteBulkResponse>(response);
     },
   
     uploadAudio: async (id: string, file: File): Promise<Track> => {
@@ -114,14 +127,16 @@ import {
         method: 'POST',
         body: formData
       });
-      return handleResponse<Track>(response);
+      const data = await handleResponse<Track>(response);
+      return trackSchema.parse(data);
     },
   
     deleteAudio: async (id: string): Promise<Track> => {
       const response = await fetch(`${API_ENDPOINTS.tracks}/${id}/file`, {
         method: 'DELETE'
       });
-      return handleResponse<Track>(response);
+      const data = await handleResponse<Track>(response);
+      return trackSchema.parse(data);
     }
   };
   
@@ -129,7 +144,8 @@ import {
   export const genresApi = {
     getGenres: async (): Promise<string[]> => {
       const response = await fetch(API_ENDPOINTS.genres);
-      return handleResponse<string[]>(response);
+      const data = await handleResponse<string[]>(response);
+      return z.array(z.string()).parse(data);
     }
   };
   
