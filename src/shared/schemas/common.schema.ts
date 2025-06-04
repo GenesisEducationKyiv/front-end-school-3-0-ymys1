@@ -36,4 +36,4 @@ export type PaginationOptions = z.infer<typeof paginationSchema>;
 export type SortOptions = z.infer<typeof sortSchema>;
 export type TrackFilters = z.infer<typeof filterSchema>;
 export type TrackQueryParams = z.infer<typeof trackQuerySchema>;
-export type PaginatedResponse<T> = Omit<z.infer<typeof paginatedResponseSchema>, 'data'> & { data: T[] }; 
+export type PaginatedResponse<T> = Omit<z.infer<typeof paginatedResponseSchema>, 'data'> & { data: T[] };

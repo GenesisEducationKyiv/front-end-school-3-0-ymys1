@@ -25,4 +25,4 @@ export const updateTrackSchema = createTrackSchema.partial();
 
 export type Track = z.infer<typeof trackSchema>;
 export type CreateTrackDto = z.infer<typeof createTrackSchema>;
-export type UpdateTrackDto = z.infer<typeof updateTrackSchema>; 
+export type UpdateTrackDto = z.infer<typeof updateTrackSchema>;
