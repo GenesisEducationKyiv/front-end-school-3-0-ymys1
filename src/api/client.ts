@@ -2,7 +2,9 @@ import {
     Track,
     trackSchema,
     createTrackSchema,
-    updateTrackSchema
+    updateTrackSchema,
+    CreateTrackDto,
+    UpdateTrackDto
   } from '../shared/schemas/track.schema';
   import {
     PaginatedResponse,
@@ -84,7 +86,7 @@ import {
       return handleResponse(response, trackSchema);
     },
   
-    createTrack: async (data: unknown): Promise<Result<Track, Error>> => {
+    createTrack: async (data: CreateTrackDto): Promise<Result<Track, Error>> => {
       const validData = createTrackSchema.safeParse(data);
       if (!validData.success) {
         return err(new Error('Invalid track data'));
@@ -99,7 +101,7 @@ import {
       return handleResponse(response, trackSchema);
     },
   
-    updateTrack: async (id: string, data: unknown): Promise<Result<Track, Error>> => {
+    updateTrack: async (id: string, data: UpdateTrackDto): Promise<Result<Track, Error>> => {
       const validData = updateTrackSchema.safeParse(data);
       if (!validData.success) {
         return err(new Error('Invalid track data'));
