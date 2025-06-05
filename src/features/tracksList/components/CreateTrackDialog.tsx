@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Track } from '../../../shared/types';
+import { CreateTrackDto } from '../../../shared/schemas/track.schema';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import {
@@ -9,11 +9,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../../../components/ui/dialog';
-
-type CreateTrackDto = Pick<Track, 'title' | 'artist' | 'album' | 'genres'> & {
-  coverImage?: string;
-  audioFile?: string;
-};
 
 interface CreateTrackDialogProps {
   open: boolean;
@@ -41,7 +36,7 @@ export function CreateTrackDialog({ open, onOpenChange, onSave }: CreateTrackDia
       album: formData.album || undefined,
       genres: formData.genres.split(',').map(g => g.trim()).filter(Boolean),
       coverImage: coverImage ? URL.createObjectURL(coverImage) : undefined,
-      audioFile: undefined // This will be handled by the parent component
+      audioFile: undefined
     };
 
     onSave(trackData, audioFile);

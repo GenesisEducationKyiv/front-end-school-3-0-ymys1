@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectLoading, selectError, selectTracks } from './tracksListSlice';
-import { setTracks, updateTrack, deleteTrack, addTrack } from './tracksListSlice';
+import { setTracks, updateTrack, deleteTrack, addTrack, setError } from './tracksListSlice';
 import { tracksApi } from '../../api/client';
-import { Track, CreateTrackDto } from '../../shared/types';
+import { Track, CreateTrackDto } from '../../shared/schemas/track.schema';
 import { useFilterParams } from '../../shared/hooks/useFilterParams';
 import { TrackItem } from './components/TrackItem';
 import { EditTrackDialog } from './components/EditTrackDialog';
@@ -33,7 +33,7 @@ export function TrackList() {
 
   useEffect(() => {
     const fetchTracks = async () => {
-      const response = await tracksApi.getTracks({
+      const result = await tracksApi.getTracks({
         page: currentPage,
         pageSize: 20,
         search,
@@ -42,8 +42,14 @@ export function TrackList() {
         sortBy: (sortBy as 'title' | 'artist' | 'album' | 'createdAt') || undefined,
         sortOrder
       });
-      dispatch(setTracks(response.data));
-      setTotalPages(response.meta.totalPages);
+
+      if (result.isOk()) {
+        dispatch(setTracks(result.value.data));
+        setTotalPages(result.value.meta.totalPages);
+        dispatch(setError(null));
+      } else {
+        dispatch(setError(result.error.message));
+      }
     };
     fetchTracks();
   }, [dispatch, currentPage, search, genre, artist, sortBy, sortOrder]);
@@ -53,43 +59,65 @@ export function TrackList() {
   };
 
   const handleEditTrack = async (updatedTrack: Track) => {
-    try {
-      await tracksApi.updateTrack(updatedTrack.id, updatedTrack);
+    const result = await tracksApi.updateTrack(updatedTrack.id, updatedTrack);
+
+    if (result.isOk()) {
       dispatch(updateTrack(updatedTrack));
-    } catch (error) {
-      console.error('Failed to update track:', error);
+      dispatch(setError(null));
+    } else {
+      console.error('Failed to update track:', result.error);
+      dispatch(setError(result.error.message));
     }
   };
 
   const handleDeleteTrack = async (track: Track) => {
-    try {
-      await tracksApi.deleteTrack(track.id);
+    const result = await tracksApi.deleteTrack(track.id);
+
+    if (result.isOk()) {
       dispatch(deleteTrack(track.id));
-    } catch (error) {
-      console.error('Failed to delete track:', error);
+      dispatch(setError(null));
+    } else {
+      console.error('Failed to delete track:', result.error);
+      dispatch(setError(result.error.message));
     }
   };
 
   const handleUploadAudio = async (track: Track, file: File) => {
-    try {
-      const updatedTrack = await tracksApi.uploadAudio(track.id, file);
-      dispatch(updateTrack(updatedTrack));
-    } catch (error) {
-      console.error('Failed to upload audio:', error);
+    const result = await tracksApi.uploadAudio(track.id, file);
+
+    if (result.isOk()) {
+      dispatch(updateTrack(result.value));
+      dispatch(setError(null));
+    } else {
+      console.error('Failed to upload audio:', result.error);
+      dispatch(setError(result.error.message));
     }
   };
 
   const handleCreateTrack = async (trackData: CreateTrackDto, audioFile: File | null) => {
-    try {
-      const newTrack = await tracksApi.createTrack(trackData);
+    const createResult = await tracksApi.createTrack(trackData);
+    
+    if (createResult.isOk()) {
+      const newTrack = createResult.value;
+
       if (audioFile) {
-        const trackWithAudio = await tracksApi.uploadAudio(newTrack.id, audioFile);
-        dispatch(addTrack(trackWithAudio));
+        const uploadResult = await tracksApi.uploadAudio(newTrack.id, audioFile);
+        if (uploadResult.isOk()) {
+          dispatch(addTrack(uploadResult.value));
+          dispatch(setError(null));
+        } else {
+          console.error('Failed to upload audio:', uploadResult.error);
+          dispatch(setError(uploadResult.error.message));
+          // Still add the track even if audio upload fails
+          dispatch(addTrack(newTrack));
+        }
       } else {
         dispatch(addTrack(newTrack));
+        dispatch(setError(null));
       }
-    } catch (error) {
-      console.error('Failed to create track:', error);
+    } else {
+      console.error('Failed to create track:', createResult.error);
+      dispatch(setError(createResult.error.message));
     }
   };
 

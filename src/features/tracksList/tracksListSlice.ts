@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../../store/store';
-import { Track } from '../../shared/types';
+import { Track } from '../../shared/schemas/track.schema';
 
 interface Pagination {
     limit: number;
