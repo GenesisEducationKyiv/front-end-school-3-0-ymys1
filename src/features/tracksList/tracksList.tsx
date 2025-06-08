@@ -13,6 +13,10 @@ import { CreateTrackDialog } from './components/CreateTrackDialog';
 import { Button } from '../../components/ui/button';
 import { Pagination } from './components/Pagination';
 import { Plus } from 'lucide-react';
+import { O } from '@mobily/ts-belt';
+
+type SortBy = 'title' | 'artist' | 'album' | 'createdAt';
+type SortOrder = 'asc' | 'desc';
 
 export function TrackList() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -36,11 +40,11 @@ export function TrackList() {
       const result = await tracksApi.getTracks({
         page: currentPage,
         pageSize: 20,
-        search,
-        genre: genre || undefined,
-        artist: artist || undefined,
-        sortBy: (sortBy as 'title' | 'artist' | 'album' | 'createdAt') || undefined,
-        sortOrder
+        search: O.toUndefined(search),
+        genre: O.toUndefined(genre),
+        artist: O.toUndefined(artist),
+        sortBy: (O.toUndefined(sortBy) || 'title') as SortBy,
+        sortOrder: (O.toUndefined(sortOrder) || 'asc') as SortOrder
       });
 
       if (result.isOk()) {
