@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectLoading, selectError, selectTracks } from './tracksListSlice';
 import { setTracks, updateTrack, deleteTrack, addTrack, setError } from './tracksListSlice';
@@ -35,16 +35,20 @@ export function TrackList() {
   const isLoading = useSelector(selectLoading);
   const error = useSelector(selectError);
 
+  const resolvedFilters = useMemo(() => ({
+    search: O.toUndefined(search),
+    genre: O.toUndefined(genre),
+    artist: O.toUndefined(artist),
+    sortBy: (O.toUndefined(sortBy) || 'title') as SortBy,
+    sortOrder: (O.toUndefined(sortOrder) || 'asc') as SortOrder
+  }), [search, genre, artist, sortBy, sortOrder]);
+
   useEffect(() => {
     const fetchTracks = async () => {
       const result = await tracksApi.getTracks({
         page: currentPage,
         pageSize: 20,
-        search: O.toUndefined(search),
-        genre: O.toUndefined(genre),
-        artist: O.toUndefined(artist),
-        sortBy: (O.toUndefined(sortBy) || 'title') as SortBy,
-        sortOrder: (O.toUndefined(sortOrder) || 'asc') as SortOrder
+        ...resolvedFilters
       });
 
       if (result.isOk()) {
@@ -56,7 +60,7 @@ export function TrackList() {
       }
     };
     fetchTracks();
-  }, [dispatch, currentPage, search, genre, artist, sortBy, sortOrder]);
+  }, [dispatch, currentPage, resolvedFilters]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
