@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectLoading, selectError, selectTracks } from './tracksListSlice';
 import { setTracks, updateTrack, deleteTrack, addTrack, setError } from './tracksListSlice';
@@ -13,6 +13,34 @@ import { CreateTrackDialog } from './components/CreateTrackDialog';
 import { Button } from '../../components/ui/button';
 import { Pagination } from './components/Pagination';
 import { Plus } from 'lucide-react';
+import { O, type Option } from '@mobily/ts-belt';
+
+type SortBy = 'title' | 'artist' | 'album' | 'createdAt';
+type SortOrder = 'asc' | 'desc';
+
+const isSortBy = (value: string): value is SortBy => {
+  return ['title', 'artist', 'album', 'createdAt'].includes(value);
+};
+
+const isSortOrder = (value: string): value is SortOrder => {
+  return ['asc', 'desc'].includes(value);
+};
+
+const getSortByValue = (value: Option<string>): SortBy => {
+  return O.match(
+    value,
+    (val) => isSortBy(val) ? val : 'title',
+    () => 'title'
+  );
+};
+
+const getSortOrderValue = (value: Option<string>): SortOrder => {
+  return O.match(
+    value,
+    (val) => isSortOrder(val) ? val : 'asc',
+    () => 'asc'
+  );
+};
 
 export function TrackList() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -31,16 +59,20 @@ export function TrackList() {
   const isLoading = useSelector(selectLoading);
   const error = useSelector(selectError);
 
+  const resolvedFilters = useMemo(() => ({
+    search: O.toUndefined(search),
+    genre: O.toUndefined(genre),
+    artist: O.toUndefined(artist),
+    sortBy: getSortByValue(sortBy),
+    sortOrder: getSortOrderValue(sortOrder)
+  }), [search, genre, artist, sortBy, sortOrder]);
+
   useEffect(() => {
     const fetchTracks = async () => {
       const result = await tracksApi.getTracks({
         page: currentPage,
         pageSize: 20,
-        search,
-        genre: genre || undefined,
-        artist: artist || undefined,
-        sortBy: (sortBy as 'title' | 'artist' | 'album' | 'createdAt') || undefined,
-        sortOrder
+        ...resolvedFilters
       });
 
       if (result.isOk()) {
@@ -52,7 +84,7 @@ export function TrackList() {
       }
     };
     fetchTracks();
-  }, [dispatch, currentPage, search, genre, artist, sortBy, sortOrder]);
+  }, [dispatch, currentPage, resolvedFilters]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

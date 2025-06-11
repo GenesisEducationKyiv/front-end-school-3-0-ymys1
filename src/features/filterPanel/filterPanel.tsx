@@ -4,6 +4,7 @@ import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { SORT_OPTIONS } from "./constants/constants";
 import { useFilterParams } from "../../shared/hooks/useFilterParams";
+import { O } from "@mobily/ts-belt";
 
 export const FilterPanel = ({
     artists = [],
@@ -22,8 +23,8 @@ export const FilterPanel = ({
                     <Input
                         type="text"
                         placeholder="Search by title, artist or album..."
-                        value={filters.search}
-                        onChange={(e) => updateFilters({ search: e.target.value })}
+                        value={O.toNullable(filters.search) || ''}
+                        onChange={(e) => updateFilters({ search: O.Some(e.target.value) })}
                         className="pl-9 cursor-text"
                         data-testid="search-input"
                     />
@@ -33,8 +34,10 @@ export const FilterPanel = ({
                     <div className="space-y-2 text-center">
                         <Label htmlFor="genre-filter" className="text-center block">Genre</Label>
                         <Select
-                            value={filters.genre ?? "all"}
-                            onValueChange={(value) => updateFilters({ genre: value === 'all' ? null : value })}
+                            value={O.toNullable(filters.genre) ?? "all"}
+                            onValueChange={(value) => updateFilters({ 
+                                genre: value === 'all' ? O.None : O.Some(value) 
+                            })}
                             data-testid="filter-genre"
                         >
                             <SelectTrigger id="genre-filter" className="text-center cursor-pointer focus:ring-0 w-full">
@@ -55,8 +58,10 @@ export const FilterPanel = ({
                     <div className="space-y-2 text-center">
                         <Label htmlFor="artist-filter" className="text-center block">Artist</Label>
                         <Select
-                            value={filters.artist ?? "all"}
-                            onValueChange={(value) => updateFilters({ artist: value === 'all' ? null : value })}
+                            value={O.toNullable(filters.artist) ?? "all"}
+                            onValueChange={(value) => updateFilters({ 
+                                artist: value === 'all' ? O.None : O.Some(value) 
+                            })}
                             data-testid="filter-artist"
                         >
                             <SelectTrigger id="artist-filter" className="text-center cursor-pointer focus:ring-0 w-full">
@@ -77,8 +82,8 @@ export const FilterPanel = ({
                     <div className="space-y-2 text-center">
                         <Label htmlFor="sort-by" className="text-center block">Sort By</Label>
                         <Select
-                            value={filters.sortBy ?? "title"}
-                            onValueChange={(value) => updateFilters({ sortBy: value })}
+                            value={O.toNullable(filters.sortBy) ?? "title"}
+                            onValueChange={(value) => updateFilters({ sortBy: O.Some(value) })}
                             data-testid="sort-select"
                         >
                             <SelectTrigger id="sort-by" className="text-center cursor-pointer focus:ring-0 w-full">
@@ -98,8 +103,10 @@ export const FilterPanel = ({
                     <div className="space-y-2 text-center">
                         <Label htmlFor="sort-order" className="text-center block">Order</Label>
                         <Select
-                            value={filters.sortOrder ?? "asc"}
-                            onValueChange={(value) => updateFilters({ sortOrder: value as 'asc' | 'desc' })}
+                            value={O.toNullable(filters.sortOrder) ?? "asc"}
+                            onValueChange={(value) => updateFilters({ 
+                                sortOrder: O.Some(value as 'asc' | 'desc') 
+                            })}
                         >
                             <SelectTrigger id="sort-order" className="text-center cursor-pointer focus:ring-0 w-full">
                                 <SelectValue placeholder="Order" />

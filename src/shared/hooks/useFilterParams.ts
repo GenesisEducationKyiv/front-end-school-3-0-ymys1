@@ -1,19 +1,13 @@
+import { O } from '@mobily/ts-belt';
+import type { Option } from '@mobily/ts-belt';
 import { useSearchParams } from 'react-router-dom';
 
-interface Filters {
-    search: string;
-    genre: string | null;
-    artist: string | null;
-    sortBy: string;
-    sortOrder: 'asc' | 'desc';
-}
-
 interface UpdateFilters {
-    search?: string;
-    genre?: string | null;
-    artist?: string | null;
-    sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
+    search?: Option<string>;
+    genre?: Option<string>;
+    artist?: Option<string>;
+    sortBy?: Option<string>;
+    sortOrder?: Option<string>;
 }
 
 export const useFilterParams = () => {
@@ -23,24 +17,29 @@ export const useFilterParams = () => {
         const newParams = new URLSearchParams(searchParams);
         
         Object.entries(updates).forEach(([key, value]) => {
-            if (value === null || value === '') {
-                newParams.delete(key);
+            if (O.isSome(value)) {
+                newParams.set(key, O.getExn(value));
             } else {
-                newParams.set(key, value);
+                newParams.delete(key);
             }
         });
 
         setSearchParams(newParams);
     };
 
+    const getParamAsOption = (param: string): Option<string> => {
+        const value = searchParams.get(param);
+        return value && value !== '' ? O.Some(value) : O.None;
+    };
+
     return {
         filters: {
-            search: searchParams.get('search') || '',
-            genre: searchParams.get('genre'),
-            artist: searchParams.get('artist'),
-            sortBy: searchParams.get('sortBy') || 'title',
-            sortOrder: (searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc'
+            search: getParamAsOption('search'),
+            genre: getParamAsOption('genre'),
+            artist: getParamAsOption('artist'),
+            sortBy: getParamAsOption('sortBy'),
+            sortOrder: getParamAsOption('sortOrder')
         },
         updateFilters
     };
-}; 
+};
