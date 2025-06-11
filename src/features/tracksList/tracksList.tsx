@@ -13,10 +13,34 @@ import { CreateTrackDialog } from './components/CreateTrackDialog';
 import { Button } from '../../components/ui/button';
 import { Pagination } from './components/Pagination';
 import { Plus } from 'lucide-react';
-import { O } from '@mobily/ts-belt';
+import { O, type Option } from '@mobily/ts-belt';
 
 type SortBy = 'title' | 'artist' | 'album' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
+
+const isSortBy = (value: string): value is SortBy => {
+  return ['title', 'artist', 'album', 'createdAt'].includes(value);
+};
+
+const isSortOrder = (value: string): value is SortOrder => {
+  return ['asc', 'desc'].includes(value);
+};
+
+const getSortByValue = (value: Option<string>): SortBy => {
+  return O.match(
+    value,
+    (val) => isSortBy(val) ? val : 'title',
+    () => 'title'
+  );
+};
+
+const getSortOrderValue = (value: Option<string>): SortOrder => {
+  return O.match(
+    value,
+    (val) => isSortOrder(val) ? val : 'asc',
+    () => 'asc'
+  );
+};
 
 export function TrackList() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -39,8 +63,8 @@ export function TrackList() {
     search: O.toUndefined(search),
     genre: O.toUndefined(genre),
     artist: O.toUndefined(artist),
-    sortBy: (O.toUndefined(sortBy) || 'title') as SortBy,
-    sortOrder: (O.toUndefined(sortOrder) || 'asc') as SortOrder
+    sortBy: getSortByValue(sortBy),
+    sortOrder: getSortOrderValue(sortOrder)
   }), [search, genre, artist, sortBy, sortOrder]);
 
   useEffect(() => {
