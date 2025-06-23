@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { O } from '@mobily/ts-belt';
 
-// Mock the useFilterParams hook
 const mockUpdateFilters = vi.fn();
 const mockUseFilterParams = vi.fn();
 
@@ -11,16 +11,16 @@ vi.mock('../../../shared/hooks/useFilterParams', () => ({
   useFilterParams: mockUseFilterParams
 }));
 
-// Helper to render with router
 const renderWithRouter = (component: React.ReactElement) => {
   return render(<BrowserRouter>{component}</BrowserRouter>);
 };
 
 describe('FilterPanel', () => {
-  beforeEach(() => {
+  let FilterPanel: any;
+
+  beforeEach(async () => {
     vi.clearAllMocks();
     
-    // Default mock setup
     mockUseFilterParams.mockReturnValue({
       filters: {
         search: O.None,
@@ -31,24 +31,46 @@ describe('FilterPanel', () => {
       },
       updateFilters: mockUpdateFilters
     });
+
+    const module = await import('../filterPanel');
+    FilterPanel = module.FilterPanel;
   });
 
-  it('should render search input', async () => {
-    const { FilterPanel } = await import('../filterPanel');
+  it('should render search input', () => {
     renderWithRouter(<FilterPanel />);
 
-    expect(screen.getByPlaceholderText(/search by title, artist or album/i)).toBeInTheDocument();
+    expect(screen.getByTestId('search-input')).toBeInTheDocument();
   });
 
-  it('should handle search input changes', async () => {
-    const { FilterPanel } = await import('../filterPanel');
+  it('should handle search input changes', () => {
     renderWithRouter(<FilterPanel />);
 
-    const searchInput = screen.getByPlaceholderText(/search by title, artist or album/i);
-    fireEvent.change(searchInput, { target: { value: 'test' } });
+    const searchInput = screen.getByTestId('search-input');
+    fireEvent.change(searchInput, { target: { value: 'test search' } });
 
     expect(mockUpdateFilters).toHaveBeenCalledWith({
-      search: O.Some('test')
+      search: O.Some('test search')
+    });
+  });
+
+  it('should render genre filter', () => {
+    renderWithRouter(<FilterPanel genres={['Rock', 'Jazz', 'Pop']} />);
+
+    expect(screen.getByTestId('filter-genre')).toBeInTheDocument();
+  });
+
+  it('should handle genre selection changes', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<FilterPanel genres={['Rock', 'Jazz', 'Pop']} />);
+
+    const genreSelect = screen.getByTestId('filter-genre');
+    await user.click(genreSelect);
+
+    const rockOption = await screen.findByText('Rock');
+    await user.click(rockOption);
+
+    expect(mockUpdateFilters).toHaveBeenCalledWith({
+      genre: O.Some('Rock')
     });
   });
 });

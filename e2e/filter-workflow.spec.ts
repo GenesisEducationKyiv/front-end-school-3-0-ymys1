@@ -5,13 +5,23 @@ test.describe('Filter Workflow', () => {
     await page.goto('/');
   });
 
-  test('should handle complete search workflow', async ({ page }) => {
-    // Test search input display and interaction
-    const searchInput = page.locator('[data-testid="search-input"]');
-    await expect(searchInput).toBeVisible();
+  test('should filter tracks by search', async ({ page }) => {
+
+    await expect(page.locator('[data-testid^="track-item-"]')).toBeVisible();
+
+    const initialTracks = await page.locator('[data-testid^="track-item-"]').count();
     
-    // Test search functionality
-    await searchInput.fill('test search');
-    await expect(searchInput).toHaveValue('test search');
+    const searchInput = page.locator('[data-testid="search-input"]');
+    await searchInput.fill('rock');
+
+    await page.waitForTimeout(500);
+    const filteredTracks = await page.locator('[data-testid^="track-item-"]').count();
+    
+    expect(filteredTracks).toBeLessThanOrEqual(initialTracks);
+    
+    await searchInput.clear();
+    await page.waitForTimeout(500);
+    const clearedTracks = await page.locator('[data-testid^="track-item-"]').count();
+    expect(clearedTracks).toEqual(initialTracks);
   });
-}); 
+});

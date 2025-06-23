@@ -5,12 +5,18 @@ test.describe('Tracks Workflow', () => {
     await page.goto('/');
   });
 
-  test('should display tracks page', async ({ page }) => {
-    await expect(page.getByRole('main')).toBeVisible();
-  });
-
-  test('should display add track button', async ({ page }) => {
+  test('should open create track dialog', async ({ page }) => {
     const addButton = page.getByRole('button', { name: /add track/i });
-    await expect(addButton).toBeVisible();
+    await addButton.click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText('Create New Track');
+
+    await expect(page.getByLabel('Title')).toBeVisible();
+    await expect(page.getByLabel('Artist')).toBeVisible();
+
+    await page.getByRole('button', { name: /cancel/i }).click();
+    await expect(dialog).not.toBeVisible();
   });
-}); 
+});

@@ -1,56 +1,52 @@
 import { test, expect } from '@playwright/experimental-ct-react';
+import { type Page } from '@playwright/test';
 import { BrowserRouter } from 'react-router-dom';
-import { O } from '@mobily/ts-belt';
+import { FilterPanel } from '../filterPanel';
 
-// Create a story component for testing
-const FilterPanelStory = () => {
-  const mockFilters = {
-    search: O.None,
-    genre: O.None,
-    artist: O.None,
-    sortBy: O.None,
-    sortOrder: O.None
-  };
+test.describe('FilterPanel Integration (Playwright)', () => {
+  test('should work with real browser environment and URL synchronization', async ({ mount, page }: { mount: any, page: Page }) => {
+    const component = await mount(
+      <BrowserRouter>
+        <FilterPanel genres={['Rock', 'Jazz', 'Pop']} artists={['Artist1', 'Artist2']} />
+      </BrowserRouter>
+    );
 
-  const mockUpdateFilters = (updates: any) => {
-    console.log('Filter updates:', updates);
-  };
+    const searchInput = component.getByTestId('search-input');
+    await expect(searchInput).toBeVisible();
+    
+    await searchInput.fill('browser integration test');
+    await expect(searchInput).toHaveValue('browser integration test');
+    
+    const url = page.url();
+    expect(url).toContain('search=browser+integration+test');
+  });
 
-  // We need to dynamically import the component inside the story
-  const React = require('react');
-  const { useState, useEffect } = React;
-  const [FilterPanel, setFilterPanel] = useState(null);
+  test('should load initial state from URL parameters', async ({ mount, page }: { mount: any, page: Page }) => {
+    await page.goto('/?search=initial-test&genre=Rock');
+    
+    const component = await mount(
+      <BrowserRouter>
+        <FilterPanel genres={['Rock', 'Jazz', 'Pop']} artists={['Artist1', 'Artist2']} />
+      </BrowserRouter>
+    );
 
-  useEffect(() => {
-    import('../filterPanel').then(module => {
-      setFilterPanel(() => module.FilterPanel);
-    });
-  }, []);
+    const searchInput = component.getByTestId('search-input');
+    await expect(searchInput).toHaveValue('initial-test');
+  });
 
-  if (!FilterPanel) return React.createElement('div', null, 'Loading...');
+  test('should handle genre selection in real browser', async ({ mount, page }: { mount: any, page: Page }) => {
+    const component = await mount(
+      <BrowserRouter>
+        <FilterPanel genres={['Rock', 'Jazz', 'Pop']} artists={['Artist1', 'Artist2']} />
+      </BrowserRouter>
+    );
 
-  return React.createElement(
-    BrowserRouter,
-    null,
-    React.createElement(FilterPanel, {
-      // Pass mock data as props would normally come from useFilterParams
-      filters: mockFilters,
-      updateFilters: mockUpdateFilters
-    })
-  );
-};
-
-test('FilterPanel component renders and accepts input in browser', async ({ mount }) => {
-  const component = await mount(<FilterPanelStory />);
-  
-  // Wait for the component to load
-  await expect(component.getByText('Loading...')).not.toBeVisible();
-  
-  // Test that search input is present and functional
-  const searchInput = component.locator('input[placeholder*="search"]');
-  await expect(searchInput).toBeVisible();
-  
-  // Test user interaction
-  await searchInput.fill('component test');
-  await expect(searchInput).toHaveValue('component test');
-}); 
+    const genreSelect = component.getByTestId('filter-genre');
+    await genreSelect.click();
+    
+    await component.getByText('Rock').click();
+    
+    const url = page.url();
+    expect(url).toContain('genre=Rock');
+  });
+});
