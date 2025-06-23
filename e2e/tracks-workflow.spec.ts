@@ -15,7 +15,15 @@ test.describe('Tracks Workflow', () => {
 
     await expect(page.getByLabel('Title')).toBeVisible();
     await expect(page.getByLabel('Artist')).toBeVisible();
+  });
 
+  test('should close create track dialog', async ({ page }) => {
+    const addButton = page.getByRole('button', { name: /add track/i });
+    await addButton.click();
+    
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    
     await page.getByRole('button', { name: /cancel/i }).click();
     await expect(dialog).not.toBeVisible();
   });
