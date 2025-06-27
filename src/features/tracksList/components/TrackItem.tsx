@@ -1,16 +1,15 @@
-import { useMemo } from "react"
+import { useState, useEffect } from "react"
 import { Track } from "../../../shared/schemas/track.schema"
 import { Badge } from "../../../components/ui/badge"
 import { Edit, MoreVertical, Upload, Trash2, Music } from "lucide-react"
 import { cn } from "../../../shared/utils/utils"
-import { filesApi } from "../../../api/client"
+import { filesApi } from "../../../api/graphql"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu"
-// import { Checkbox } from "../../../components/ui/checkbox"
 import { Button } from "../../../components/ui/button"
 
 interface TrackItemProps {
@@ -29,12 +28,24 @@ export function TrackItem({
   onDelete,
   onUpload,
   className,
-//   isSelected,
-//   onToggleSelect,
 }: TrackItemProps) {
-  const audioUrl = useMemo(() => filesApi.getFileUrl(track.audioFile), [track.audioFile])
-  const hasAudio = Boolean(track.audioFile)
+  const [audioUrl, setAudioUrl] = useState<string | undefined>(undefined);
+  
+  useEffect(() => {
+    const fetchAudioUrl = async () => {
+      if (track.audioFile) {
+        const result = await filesApi.getFileUrl(track.audioFile);
+        if (result.isOk()) {
+          setAudioUrl(result.value);
+        } else {
+          console.error('Failed to get file URL:', result.error);
+        }
+      }
+    };
+    fetchAudioUrl();
+  }, [track.audioFile]);
 
+  const hasAudio = Boolean(track.audioFile)
   const defaultCoverImage = "https://picsum.photos/seed/default/300/300"
   const coverImage = track.coverImage || defaultCoverImage
 
@@ -46,20 +57,6 @@ export function TrackItem({
       )}
       data-testid={`track-item-${track.id}`}
     >
-      {/* <div className="absolute left-2 top-2 z-10">
-        <Checkbox
-          checked={isSelected}
-          onCheckedChange={onToggleSelect}
-          className={cn(
-            "transition-opacity duration-150",
-            isSelected
-              ? "opacity-100"
-              : "opacity-0 group-hover:opacity-70"
-          )}
-          data-testid={`track-checkbox-${track.id}`}
-        />
-      </div> */}
-
       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
         <div className="relative mb-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md sm:mb-0">
           <img
@@ -182,4 +179,4 @@ export function TrackItem({
       </div>
     </div>
   )
-} 
+}

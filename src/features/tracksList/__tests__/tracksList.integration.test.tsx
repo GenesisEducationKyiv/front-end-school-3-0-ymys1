@@ -6,8 +6,8 @@ import { configureStore } from '@reduxjs/toolkit';
 import { O } from '@mobily/ts-belt';
 import tracksSlice from '../tracksListSlice';
 
-// Mock the API client
-vi.mock('../../../api/client', () => ({
+// Mock the GraphQL API
+vi.mock('../../../api/graphql', () => ({
   tracksApi: {
     getTracks: vi.fn()
   },
@@ -37,7 +37,7 @@ describe('TrackList Integration', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     
-    const apiClient = await import('../../../api/client');
+    const apiClient = await import('../../../api/graphql');
     mockGetTracks = vi.mocked(apiClient.tracksApi.getTracks);
     
     const trackListModule = await import('../tracksList');
