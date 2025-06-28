@@ -17,7 +17,7 @@ interface UpdateAudioDialogProps {
   onUpload: (track: Track, file: File) => void;
 }
 
-export function UpdateAudioDialog({ track, open, onOpenChange, onUpload }: UpdateAudioDialogProps) {
+export default function UpdateAudioDialog({ track, open, onOpenChange, onUpload }: UpdateAudioDialogProps) {
   const [file, setFile] = useState<File | null>(null);
 
   if (!track) return null;

@@ -16,7 +16,7 @@ interface CreateTrackDialogProps {
   onSave: (trackData: CreateTrackDto, audioFile: File | null) => void;
 }
 
-export function CreateTrackDialog({ open, onOpenChange, onSave }: CreateTrackDialogProps) {
+export default function CreateTrackDialog({ open, onOpenChange, onSave }: CreateTrackDialogProps) {
   const [formData, setFormData] = useState({
     title: '',
     artist: '',

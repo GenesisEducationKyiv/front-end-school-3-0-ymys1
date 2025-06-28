@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectLoading, selectError, selectTracks } from './tracksListSlice';
 import { setTracks, updateTrack, deleteTrack, addTrack, setError } from './tracksListSlice';
@@ -6,14 +6,16 @@ import { tracksApi } from '../../api/graphql';
 import { Track, CreateTrackDto } from '../../shared/schemas/track.schema';
 import { useFilterParams } from '../../shared/hooks/useFilterParams';
 import { TrackItem } from './components/TrackItem';
-import { EditTrackDialog } from './components/EditTrackDialog';
-import { DeleteTrackDialog } from './components/DeleteTrackDialog';
-import { UpdateAudioDialog } from './components/UpdateAudioDialog';
-import { CreateTrackDialog } from './components/CreateTrackDialog';
 import { Button } from '../../components/ui/button';
 import { Pagination } from './components/Pagination';
 import { Plus } from 'lucide-react';
 import { O, type Option } from '@mobily/ts-belt';
+
+// Lazy load dialog components
+const EditTrackDialog = lazy(() => import('./components/EditTrackDialog'));
+const DeleteTrackDialog = lazy(() => import('./components/DeleteTrackDialog'));
+const UpdateAudioDialog = lazy(() => import('./components/UpdateAudioDialog'));
+const CreateTrackDialog = lazy(() => import('./components/CreateTrackDialog'));
 
 type SortBy = 'title' | 'artist' | 'album' | 'createdAt';
 type SortOrder = 'asc' | 'desc';
