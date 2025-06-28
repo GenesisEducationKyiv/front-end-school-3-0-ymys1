@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectLoading, selectError, selectTracks } from './tracksListSlice';
 import { setTracks, updateTrack, deleteTrack, addTrack, setError } from './tracksListSlice';
-import { tracksApi } from '../../api/client';
+import { tracksApi } from '../../api/graphql';
 import { Track, CreateTrackDto } from '../../shared/schemas/track.schema';
 import { useFilterParams } from '../../shared/hooks/useFilterParams';
 import { TrackItem } from './components/TrackItem';
