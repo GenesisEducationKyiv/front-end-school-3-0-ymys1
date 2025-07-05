@@ -3,6 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop, hw9_CI ]
+  pull_request:
+    branches: [ main, develop, hw9_CI ]
 
 jobs:
   ci:
@@ -30,8 +32,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     
-    - name: Install dependencies
-      run: npm ci
+    - name: Clean install dependencies
+      run: |
+        rm -rf node_modules
+        rm -f package-lock.json
+        npm install
     
     - name: Run ESLint
       run: npm run lint
