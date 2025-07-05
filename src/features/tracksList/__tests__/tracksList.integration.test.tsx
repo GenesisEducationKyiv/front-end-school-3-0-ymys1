@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { configureStore } from '@reduxjs/toolkit';
 import { O } from '@mobily/ts-belt';
 import tracksSlice from '../tracksListSlice';
+import { ok } from 'neverthrow';
 
 // Mock the GraphQL API
 vi.mock('../../../api/graphql', () => ({
@@ -12,7 +13,7 @@ vi.mock('../../../api/graphql', () => ({
     getTracks: vi.fn()
   },
   filesApi: {
-    getFileUrl: vi.fn()
+    getFileUrl: vi.fn().mockResolvedValue(ok('http://localhost:8000/api/files/test.mp3'))
   }
 }));
 

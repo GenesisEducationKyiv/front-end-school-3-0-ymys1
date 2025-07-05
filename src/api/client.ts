@@ -27,7 +27,7 @@ import {
       try {
         const errorData = await response.json();
         return err(new Error(errorData.error || `Error: ${response.status} ${response.statusText}`));
-      } catch (e) {
+      } catch (_e) {
         return err(new Error(`Error: ${response.status} ${response.statusText}`));
       }
     }
@@ -43,7 +43,7 @@ import {
         return err(new Error(`Invalid response format: ${parsed.error.message}`));
       }
       return ok(parsed.data);
-    } catch (e) {
+    } catch (_e) {
       return err(new Error('Failed to parse response'));
     }
   }
