@@ -17,7 +17,7 @@ interface EditTrackDialogProps {
   onSave: (track: Track) => void;
 }
 
-export function EditTrackDialog({ track, open, onOpenChange, onSave }: EditTrackDialogProps) {
+export default function EditTrackDialog({ track, open, onOpenChange, onSave }: EditTrackDialogProps) {
   const [formData, setFormData] = useState<{
     title: string;
     artist: string;

@@ -15,7 +15,7 @@ interface DeleteTrackDialogProps {
   onConfirm: (track: Track) => void;
 }
 
-export function DeleteTrackDialog({ track, open, onOpenChange, onConfirm }: DeleteTrackDialogProps) {
+export default function DeleteTrackDialog({ track, open, onOpenChange, onConfirm }: DeleteTrackDialogProps) {
   if (!track) return null;
 
   return (
