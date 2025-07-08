@@ -1,17 +1,14 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectLoading, selectError, selectTracks } from './tracksListSlice';
 import { setTracks, updateTrack, deleteTrack, addTrack, setError } from './tracksListSlice';
 import { tracksApi } from '../../api/graphql';
 import { Track, CreateTrackDto } from '../../shared/schemas/track.schema';
 import { useFilterParams } from '../../shared/hooks/useFilterParams';
+import { CreateTrackDialog, EditTrackDialog, DeleteTrackDialog, UpdateAudioDialog } from './components/LazyDialogs';
 import { TrackItem } from './components/TrackItem';
-import { EditTrackDialog } from './components/EditTrackDialog';
-import { DeleteTrackDialog } from './components/DeleteTrackDialog';
-import { UpdateAudioDialog } from './components/UpdateAudioDialog';
-import { CreateTrackDialog } from './components/CreateTrackDialog';
-import { Button } from '../../components/ui/button';
 import { Pagination } from './components/Pagination';
+import { Button } from '../../components/ui/button';
 import { Plus } from 'lucide-react';
 import { O, type Option } from '@mobily/ts-belt';
 
@@ -41,6 +38,13 @@ const getSortOrderValue = (value: Option<string>): SortOrder => {
     () => 'asc'
   );
 };
+
+// Dialog loading fallback
+const DialogLoader = () => (
+  <div className="flex items-center justify-center p-8">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
 
 export function TrackList() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -191,32 +195,59 @@ export function TrackList() {
         onPageChange={handlePageChange}
       />
 
-      <CreateTrackDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        onSave={handleCreateTrack}
-      />
+      <Suspense fallback={<DialogLoader />}>
+        <CreateTrackDialog
+          open={isCreateDialogOpen}
+          onOpenChange={setIsCreateDialogOpen}
+          onSave={handleCreateTrack}
+        />
 
-      <EditTrackDialog
-        track={editingTrack}
-        open={!!editingTrack}
-        onOpenChange={(open: boolean) => !open && setEditingTrack(null)}
-        onSave={handleEditTrack}
-      />
+        {editingTrack && (
+          <EditTrackDialog
+            open={!!editingTrack}
+            track={editingTrack}
+            onOpenChange={(open: boolean) => {
+              if (!open) setEditingTrack(null);
+            }}
+            onSave={(updatedTrack: Track) => {
+              handleEditTrack(updatedTrack);
+              setEditingTrack(null);
+            }}
+          />
+        )}
 
-      <DeleteTrackDialog
-        track={deletingTrack}
-        open={!!deletingTrack}
-        onOpenChange={(open: boolean) => !open && setDeletingTrack(null)}
-        onConfirm={handleDeleteTrack}
-      />
+        {deletingTrack && (
+          <DeleteTrackDialog
+            open={!!deletingTrack}
+            track={deletingTrack}
+            onOpenChange={(open: boolean) => {
+              if (!open) setDeletingTrack(null);
+            }}
+            onConfirm={() => {
+              if (deletingTrack) {
+                handleDeleteTrack(deletingTrack);
+                setDeletingTrack(null);
+              }
+            }}
+          />
+        )}
 
-      <UpdateAudioDialog
-        track={updatingAudioTrack}
-        open={!!updatingAudioTrack}
-        onOpenChange={(open: boolean) => !open && setUpdatingAudioTrack(null)}
-        onUpload={handleUploadAudio}
-      />
+        {updatingAudioTrack && (
+          <UpdateAudioDialog
+            open={!!updatingAudioTrack}
+            track={updatingAudioTrack}
+            onOpenChange={(open: boolean) => {
+              if (!open) setUpdatingAudioTrack(null);
+            }}
+            onUpload={(track: Track, file: File) => {
+              if (updatingAudioTrack) {
+                handleUploadAudio(track, file);
+                setUpdatingAudioTrack(null);
+              }
+            }}
+          />
+        )}
+      </Suspense>
     </>
   );
 }

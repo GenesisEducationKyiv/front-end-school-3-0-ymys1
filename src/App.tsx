@@ -1,5 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
-import TracksPage from './pages/tracksPage';
+import { lazy } from 'react';
+
+// Lazy load pages
+const TracksPage = lazy(() => import('./pages/tracksPage'));
+
 
 export default function App() {
     return (

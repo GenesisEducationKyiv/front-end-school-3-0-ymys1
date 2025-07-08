@@ -54,6 +54,7 @@
     "@vitest/ui": "^3.2.4",
     "eslint": "^9.22.0",
     "jsdom": "^26.1.0",
+    "terser": "^5.43.1",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
     "vite": "^6.3.2",

@@ -63,6 +63,7 @@ export function TrackItem({
             src={coverImage}
             alt={`${track.title} cover`}
             className="h-full w-full object-cover"
+            loading="lazy"
           />
           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
             <Music className="h-8 w-8 text-white" />
