@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CreateTrackDto } from '../../../shared/schemas/track.schema';
-import { Button } from '../../../components/ui/button';
+import { Button } from '../../../components/ui/mui-button';
 import { Input } from '../../../components/ui/input';
 import {
   Dialog,

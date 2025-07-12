@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { CreateTrackDialog } from '../../features/tracksList/components/CreateTrackDialog';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/mui-button';
 import { Plus } from 'lucide-react';
 
 const meta: Meta<typeof CreateTrackDialog> = {

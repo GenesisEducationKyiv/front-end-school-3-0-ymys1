@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/mui-button';
 import { Plus, Trash2 } from 'lucide-react';
 
 const meta: Meta<typeof Button> = {
-  title: 'UI/Button',
+  title: 'UI/Button (MUI)',
   component: Button,
   parameters: {
     layout: 'centered',
