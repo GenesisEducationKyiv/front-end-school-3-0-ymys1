@@ -25,17 +25,17 @@ import {
   async function handleResponse<T>(response: Response, schema: z.ZodType<T>): Promise<Result<T, Error>> {
     if (!response.ok) {
       try {
-        const errorData = await response.json();
+      const errorData = await response.json();
         return err(new Error(errorData.error || `Error: ${response.status} ${response.statusText}`));
       } catch (_e) {
         return err(new Error(`Error: ${response.status} ${response.statusText}`));
       }
     }
-
+  
     if (response.status === 204) {
       return ok({} as T);
     }
-
+  
     try {
       const data = await response.json();
       const parsed = schema.safeParse(data);
@@ -152,3 +152,4 @@ import {
       return handleResponse(response, z.array(z.string()));
     }
   };
+  

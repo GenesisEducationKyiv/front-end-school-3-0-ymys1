@@ -196,16 +196,16 @@ export function TrackList() {
       />
 
       <Suspense fallback={<DialogLoader />}>
-        <CreateTrackDialog
-          open={isCreateDialogOpen}
-          onOpenChange={setIsCreateDialogOpen}
-          onSave={handleCreateTrack}
-        />
+      <CreateTrackDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSave={handleCreateTrack}
+      />
 
         {editingTrack && (
-          <EditTrackDialog
+      <EditTrackDialog
             open={!!editingTrack}
-            track={editingTrack}
+        track={editingTrack}
             onOpenChange={(open: boolean) => {
               if (!open) setEditingTrack(null);
             }}
@@ -213,13 +213,13 @@ export function TrackList() {
               handleEditTrack(updatedTrack);
               setEditingTrack(null);
             }}
-          />
+      />
         )}
 
         {deletingTrack && (
-          <DeleteTrackDialog
+      <DeleteTrackDialog
             open={!!deletingTrack}
-            track={deletingTrack}
+        track={deletingTrack}
             onOpenChange={(open: boolean) => {
               if (!open) setDeletingTrack(null);
             }}
@@ -229,13 +229,13 @@ export function TrackList() {
                 setDeletingTrack(null);
               }
             }}
-          />
+      />
         )}
 
         {updatingAudioTrack && (
-          <UpdateAudioDialog
+      <UpdateAudioDialog
             open={!!updatingAudioTrack}
-            track={updatingAudioTrack}
+        track={updatingAudioTrack}
             onOpenChange={(open: boolean) => {
               if (!open) setUpdatingAudioTrack(null);
             }}
@@ -245,7 +245,7 @@ export function TrackList() {
                 setUpdatingAudioTrack(null);
               }
             }}
-          />
+      />
         )}
       </Suspense>
     </>

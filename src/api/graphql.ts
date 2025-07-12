@@ -242,3 +242,4 @@ export const genresApi = {
 };
 
 export { client as apolloClient };
+ 
