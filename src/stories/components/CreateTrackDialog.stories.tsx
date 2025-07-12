@@ -42,4 +42,4 @@ export const WithTrigger: Story = {
       </div>
     );
   },
-}; 
+};

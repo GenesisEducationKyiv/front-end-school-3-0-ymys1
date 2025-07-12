@@ -31,4 +31,4 @@ export const SearchExample: Story = {
       </div>
     </div>
   ),
-}; 
+};

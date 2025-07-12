@@ -40,4 +40,4 @@ export const WithManyGenres: Story = {
       genres: ['rock', 'jazz', 'fusion', 'progressive', 'experimental'],
     },
   },
-}; 
+};

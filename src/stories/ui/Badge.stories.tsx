@@ -27,4 +27,4 @@ export const GenreExample: Story = {
       <Badge variant="secondary">Pop</Badge>
     </div>
   ),
-}; 
+};

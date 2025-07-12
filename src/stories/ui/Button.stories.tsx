@@ -33,4 +33,4 @@ export const MusicAppExample: Story = {
       </Button>
     </div>
   ),
-}; 
+};
