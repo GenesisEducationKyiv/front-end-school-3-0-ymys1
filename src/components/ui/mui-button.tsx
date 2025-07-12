@@ -44,4 +44,4 @@ export function Button({ variant = 'default', children, ...props }: ButtonProps)
       {children}
     </MuiButton>
   );
-} 
+}
